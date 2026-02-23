@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Библиотека предметов Minecraft Bingo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      margin: 0;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 60;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .top-links {
+      font-size: 14px;
+      text-align: center;
+      max-width: 900px;
+      width: 100%;
+    }
+    a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+
+    .page {
+      padding: 78px 16px 24px;
+      display: flex;
+      justify-content: center;
+    }
+    .content {
+      width: 100%;
+      max-width: 960px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+    }
+    p {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: #9ca3af;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .search-wrap {
+      margin: 0 auto 16px;
+      max-width: 720px;
+      text-align: left;
+    }
+    .search-label {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 1px #1d4ed8;
+    }
+
+    .section {
+      margin-top: 24px;
+      text-align: left;
+    }
+    .section[data-hidden="true"] {
+      display: none;
+    }
+    .section-header {
+      position: sticky;
+      top: 46px;
+      z-index: 50;
+      padding: 8px 0 6px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+      text-align: center;
+    }
+    .section-title {
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+
+    .items-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      font-size: 15px;
+    }
+    .item-pill {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #374151;
+      background: #020617;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .item-pill[data-hidden="true"] {
+      display: none;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      margin-left: 8px;
+      background: #1e293b;
+      color: #e5e7eb;
+    }
+    
+    .footer {
+  	margin-top: 24px;
+  	font-size: 12px;
+  	color: #9ca3af;
+  	max-width: 720px;
+  	margin-left: auto;
+  	margin-right: auto;
+ 	text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .items-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 700px) {
+      .items-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 480px) {
+      .items-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-links">
+      <a href="index.html">← Вернуться к игре</a>
+      &nbsp;|&nbsp;
+      <a href="challenges.html">Библиотека усложнений</a>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="content">
+      <h1>Библиотека предметов</h1>
+      <p>
+        Здесь собраны предметы, которые используются в Bingo.
+      </p>
+
+      <div class="search-wrap">
+        <div class="search-label">Поиск предмета по названию:</div>
+        <input
+          type="text"
+          class="search-input"
+          id="itemSearch"
+          placeholder="Начните вводить название..."
+        >
+      </div>
+
+      <div class="section" id="sectionOverworld">
+        <div class="section-header">
+          <div class="section-title">Обычный мир</div>
+        </div>
+        <div class="items-grid" id="overworldList"></div>
+      </div>
+
+      <div class="section" id="sectionNether">
+        <div class="section-header">
+          <div class="section-title">Адский мир</div>
+        </div>
+        <div class="items-grid" id="netherList"></div>
+      </div>
+
+      <div class="section" id="sectionRare">
+        <div class="section-header">
+          <div class="section-title">Редкие цели</div>
+        </div>
+        <div class="items-grid" id="rareList"></div>
+      </div>
+
+      <div class="footer">
+        Список сделан для фан‑мини‑игры и не претендует на полноту.  
+        За полным списком обращайтесь к официальной вики и таблицам ID Minecraft.
+      </div>
+    </div>
+  </div>
+
+  <script src="items.js"></script>
+  <script>
+    function fillList(id, arr, tagText) {
+      const wrap = document.getElementById(id);
+      if (!wrap) return;
+      if (!Array.isArray(arr)) {
+        wrap.textContent = "Список не найден. Проверь файл items.js.";
+        return;
+      }
+
+      const sorted = arr.slice().sort((a, b) => a.localeCompare(b, "ru"));
+      sorted.forEach(name => {
+        const div = document.createElement("div");
+        div.className = "item-pill";
+        div.dataset.name = name.toLowerCase();
+        div.textContent = name;
+        if (tagText) {
+          const tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = tagText;
+          div.appendChild(tag);
+        }
+        wrap.appendChild(div);
+      });
+    }
+
+    fillList("overworldList", typeof overworldItems !== "undefined" ? overworldItems : [], "");
+    fillList("netherList", typeof netherItems !== "undefined" ? netherItems : [], "");
+    fillList("rareList", typeof rareOverworld !== "undefined" ? rareOverworld : [], "редкий");
+
+    const searchInput = document.getElementById("itemSearch");
+
+    const sections = [
+      { section: document.getElementById("sectionOverworld"), items: document.querySelectorAll("#overworldList .item-pill") },
+      { section: document.getElementById("sectionNether"),    items: document.querySelectorAll("#netherList .item-pill") },
+      { section: document.getElementById("sectionRare"),      items: document.querySelectorAll("#rareList .item-pill") }
+    ];
+
+    function applyFilter() {
+      const q = searchInput.value.trim().toLowerCase();
+
+      sections.forEach(group => {
+        let visibleCount = 0;
+        group.items.forEach(el => {
+          const name = el.dataset.name || "";
+          const match = !q || name.includes(q);
+          el.dataset.hidden = match ? "false" : "true";
+          if (match) visibleCount++;
+        });
+        group.section.dataset.hidden = visibleCount === 0 ? "true" : "false";
+      });
+    }
+
+    searchInput.addEventListener("input", applyFilter);
+  </script>
+</body>
+</html>

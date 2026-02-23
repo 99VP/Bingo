@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Minecraft Bingo</title>
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-soft: #020617;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --btn-text: #0b1120;
+      --btn-bg1: #22c55e;
+      --btn-bg2: #16a34a;
+      --border-subtle: #374151;
+      --mark-green: rgba(16,185,129,0.25);
+      --mark-red: rgba(248,113,113,0.25);
+      --mark-green-border: rgba(16,185,129,0.9);
+      --mark-red-border: rgba(248,113,113,0.9);
+      --timer-bg: rgba(15,23,42,0.95);
+      --panel-bg: rgba(15,23,42,0.98);
+      --panel-border: rgba(55,65,81,1);
+    }
+    .light-theme {
+      --bg: #f3f4f6;
+      --bg-soft: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #4b5563;
+      --btn-text: #f9fafb;
+      --btn-bg1: #3b82f6;
+      --btn-bg2: #2563eb;
+      --border-subtle: #d1d5db;
+      --mark-green: rgba(22,163,74,0.18);
+      --mark-red: rgba(248,113,113,0.2);
+      --mark-green-border: rgba(22,163,74,0.9);
+      --mark-red-border: rgba(248,113,113,0.9);
+      --timer-bg: rgba(243,244,246,0.96);
+      --panel-bg: rgba(243,244,246,0.98);
+      --panel-border: rgba(209,213,219,1);
+    }
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 10px 60px;
+      box-sizing: border-box;
+      position: relative;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 26px;
+      text-align: center;
+    }
+    p {
+      margin-top: 0;
+      margin-bottom: 10px;
+      text-align: center;
+      max-width: 640px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .top-bar {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .top-bar-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .small-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    select {
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-soft);
+      color: var(--text-main);
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+    }
+    .theme-toggle {
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-soft);
+      color: var(--text-main);
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .link-lib {
+      font-size: 12px;
+      color: #60a5fa;
+      text-decoration: none;
+    }
+    .link-lib:hover { text-decoration: underline; }
+
+    .timer-row {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .world-mode-switch {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .world-mode-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-soft);
+      color: var(--text-main);
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .world-mode-label {
+      min-width: 100px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .timer-block {
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: var(--timer-bg);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: visible;
+    }
+    .timer-display {
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-size: 24px;
+      font-weight: 700;
+      min-width: 110px;
+      text-align: center;
+    }
+    .timer-controls {
+      display: flex;
+      gap: 6px;
+    }
+    .timer-btn {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-main);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .timer-btn.active {
+      background: var(--btn-bg1);
+      color: var(--btn-text);
+      border-color: transparent;
+    }
+
+    .difficulty-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .difficulty-toggle {
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-soft);
+      color: var(--text-main);
+      padding: 6px 24px 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      min-width: 110px;
+      text-align: center;
+      transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+      position: relative;
+    }
+    .difficulty-toggle.active {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #0b1120;
+      border-color: transparent;
+      box-shadow: 0 6px 18px rgba(34,197,94,0.5);
+    }
+    .difficulty-close-inline {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      cursor: pointer;
+      color: inherit;
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .main-wrapper {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .cell {
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(15,23,42,0.85);
+      padding: 8px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 60px;
+      min-height: 60px;
+      cursor: pointer;
+      transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.06s ease;
+      font-size: 13px;
+      text-align: center;
+      user-select: none;
+    }
+    .light-theme .cell {
+      background: rgba(249,250,251,0.95);
+    }
+    .cell:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.32);
+    }
+    .cell.green {
+      background: var(--mark-green);
+      box-shadow: 0 0 0 2px var(--mark-green-border);
+    }
+    .cell.red {
+      background: var(--mark-red);
+      box-shadow: 0 0 0 2px var(--mark-red-border);
+    }
+
+    .controls-row {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .btn {
+      padding: 9px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--btn-text);
+      background: linear-gradient(135deg, var(--btn-bg1), var(--btn-bg2));
+      box-shadow: 0 12px 24px rgba(34,197,94,0.45);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(34,197,94,0.55);
+      filter: brightness(1.06);
+    }
+    .btn:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 10px 20px rgba(34,197,94,0.38);
+    }
+    .btn[disabled],
+    .timer-btn[disabled] {
+      opacity: 0.55;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 8px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .difficulty-panel {
+      position: fixed;
+      right: 10px;
+      top: 70px;
+      max-width: 420px;
+      width: min(90vw, 420px);
+      background: var(--panel-bg);
+      border-radius: 16px;
+      border: 1px solid var(--panel-border);
+      box-shadow: 0 18px 36px rgba(0,0,0,0.55);
+      padding: 12px 14px 10px;
+      z-index: 40;
+      display: none;
+    }
+    .difficulty-panel.visible { display: block; }
+    .difficulty-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .difficulty-panel-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .difficulty-panel-body {
+      font-size: 17px;
+      line-height: 1.5;
+      color: var(--text-main);
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    /* звёзды по периметру таймера */
+    .star {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #fef9c3 0%, #fde047 40%, #f97316 100%);
+      box-shadow: 0 0 6px rgba(250, 204, 21, 0.9);
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+      animation: star-pop 500ms ease-out forwards;
+    }
+    @keyframes star-pop {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.4);
+      }
+      60% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(1.1);
+      }
+    }
+
+    /* боковые фейерверки */
+    .side-firework {
+      position: fixed;
+      top: 50%;
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #fee2e2 0%, #fb7185 40%, #be123c 100%);
+      box-shadow: 0 0 8px rgba(248, 113, 113, 0.8);
+      pointer-events: none;
+      opacity: 0;
+      animation: side-firework-pop 700ms ease-out forwards;
+      z-index: 10;
+    }
+    @keyframes side-firework-pop {
+      0%   { opacity: 1; transform: translate(0, 0) scale(0.6); }
+      80%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.2); }
+    }
+
+    @media (max-width: 560px) {
+      .grid { gap: 4px; }
+      .cell {
+        min-width: 52px;
+        min-height: 52px;
+        font-size: 11px;
+        padding: 6px 4px;
+      }
+      .timer-block { padding: 6px 12px; }
+      .timer-display { font-size: 20px; }
+      .difficulty-panel { right: 6px; top: 88px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="small-label">Размер</span>
+      <select id="modeSelect">
+        <option value="1" selected>1 × 1</option>
+        <option value="4">2 × 2</option>
+        <option value="9">3 × 3</option>
+        <option value="16">4 × 4</option>
+        <option value="25">5 × 5</option>
+      </select>
+
+      <span class="small-label">Тема</span>
+      <button class="theme-toggle" id="themeToggle">Тёмная</button>
+    </div>
+    <div>
+      <a href="items.html" class="link-lib">Библиотека предметов</a>
+      &nbsp;|&nbsp;
+      <a href="challenges.html" class="link-lib">Библиотека усложнений</a>
+    </div>
+  </div>
+
+  <h1>Minecraft Bingo</h1>
+  <p>Играй с друзьями и веселись. ЛКМ — зелёная отметка, ПКМ — красная отметка.</p>
+
+  <div class="timer-row">
+    <div class="world-mode-switch">
+      <button class="world-mode-btn" id="worldPrev">&lt;</button>
+      <div class="world-mode-label" id="worldModeLabel">Обычный мир</div>
+      <button class="world-mode-btn" id="worldNext">&gt;</button>
+    </div>
+
+    <div class="timer-block" id="timerBlock">
+      <div class="timer-display" id="timerDisplay">00:00.00</div>
+      <div class="timer-controls">
+        <button class="timer-btn" id="timerStart">Старт</button>
+        <button class="timer-btn" id="timerStop">Пауза</button>
+        <button class="timer-btn" id="timerReset">Сброс</button>
+      </div>
+    </div>
+
+    <div class="difficulty-wrap">
+      <button class="difficulty-toggle" id="difficultyToggle">
+        Усложнение
+        <button class="difficulty-close-inline" id="difficultyInlineClose" title="Сбросить усложнение">×</button>
+      </button>
+    </div>
+  </div>
+
+  <div class="main-wrapper">
+    <div id="grid" class="grid"></div>
+
+<div class="controls-row">
+  <button class="btn" id="refreshBtn">Обновить</button>
+  <button class="btn" id="startRoundBtn">Начать играть</button>
+  <button class="btn" id="resetGameBtn" style="display:none;">Сбросить прогресс</button>
+  <button class="btn" id="playAgainBtn" style="display:none;">Начать заново</button>
+  <button class="btn" id="shareLinkBtn">Скопировать ссылку на эту карту</button>
+</div>
+
+  <div class="footer">
+    Этот сайт создан в развлекательных целях и не претендует на серьёзность. Используйте его просто ради веселья.
+  </div>
+
+  <div class="difficulty-panel" id="difficultyPanel">
+    <div class="difficulty-panel-header">
+      <div class="difficulty-panel-title">Дополнительное условие</div>
+    </div>
+    <div class="difficulty-panel-body" id="difficultyText">
+      Нажми «Усложнение», чтобы выбрать правило для текущего забега.
+    </div>
+  </div>
+
+  <script src="items.js"></script>
+  <script src="challenges.js"></script>
+  <script>
+    const worldModes = ["overworld", "nether"];
+    const worldNames = { overworld: "Обычный мир", nether: "Адский мир" };
+
+    const gridEl = document.getElementById("grid");
+    const modeSelect = document.getElementById("modeSelect");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const startRoundBtn = document.getElementById("startRoundBtn");
+    const resetGameBtn = document.getElementById("resetGameBtn");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+
+    const timerDisplay = document.getElementById("timerDisplay");
+    const timerStart = document.getElementById("timerStart");
+    const timerStop = document.getElementById("timerStop");
+    const timerReset = document.getElementById("timerReset");
+    const timerBlock = document.getElementById("timerBlock");
+
+    const worldPrev = document.getElementById("worldPrev");
+    const worldNext = document.getElementById("worldNext");
+    const worldModeLabel = document.getElementById("worldModeLabel");
+
+    const difficultyToggle = document.getElementById("difficultyToggle");
+    const difficultyInlineClose = document.getElementById("difficultyInlineClose");
+    const difficultyPanel = document.getElementById("difficultyPanel");
+    const difficultyText = document.getElementById("difficultyText");
+
+    const themeToggle = document.getElementById("themeToggle");
+
+    let worldModeIndex = 0;
+    let currentCells = [];
+    let timerInterval = null;
+    let timerMs = 0;
+    let gameRunning = false;
+    let hasDifficulty = false;
+
+    function updateWorldLabel() {
+      worldModeLabel.textContent = worldNames[worldModes[worldModeIndex]];
+    }
+
+    function shuffleArray(a) {
+      const arr = a.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function pickItems(count) {
+      const mode = worldModes[worldModeIndex];
+      let pool = mode === "nether" ? netherItems : overworldItems;
+      let chosen = shuffleArray(pool).slice(0, count);
+      if (mode === "overworld" && typeof rareOverworld !== "undefined" && rareOverworld.length > 0 && count >= 9) {
+        const maxRare = Math.min(3, count - 4);
+        const rareCount = Math.floor(Math.random() * (maxRare + 1));
+        const rareShuffled = shuffleArray(rareOverworld);
+        const rarePick = rareShuffled.slice(0, rareCount);
+        for (let i = 0; i < rarePick.length; i++) {
+          const idx = Math.floor(Math.random() * chosen.length);
+          chosen[idx] = rarePick[i];
+        }
+      }
+      return shuffleArray(chosen);
+    }
+
+    function generateBingo() {
+      const mode = parseInt(modeSelect.value, 10);
+      const side = Math.sqrt(mode);
+      gridEl.innerHTML = "";
+      gridEl.style.gridTemplateColumns = `repeat(${side}, minmax(0, 1fr))`;
+      currentCells = [];
+      const selected = pickItems(mode);
+      for (let i = 0; i < mode; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        const name = selected[i];
+        cell.textContent = name;
+        cell.dataset.name = name;
+        cell.dataset.state = "none";
+        cell.addEventListener("click", () => setCellState(cell, "left"));
+        cell.addEventListener("contextmenu", e => {
+          e.preventDefault();
+          setCellState(cell, "right");
+        });
+        currentCells.push(cell);
+        gridEl.appendChild(cell);
+      }
+      gameRunning = false;
+      resetTimer();
+      startRoundBtn.style.display = "";
+      resetGameBtn.style.display = "none";
+      playAgainBtn.style.display = "none";
+    }
+
+    function setCellState(cell, type) {
+      if (!gameRunning) return;
+      const cur = cell.dataset.state || "none";
+      if (type === "left") {
+        cell.dataset.state = cur === "green" ? "none" : "green";
+      } else {
+        cell.dataset.state = cur === "red" ? "none" : "red";
+      }
+      cell.classList.remove("green","red");
+      if (cell.dataset.state === "green") cell.classList.add("green");
+      if (cell.dataset.state === "red") cell.classList.add("red");
+      checkAutoFinish();
+    }
+
+    function resetMarks() {
+      currentCells.forEach(c => {
+        c.dataset.state = "none";
+        c.classList.remove("green","red");
+      });
+    }
+
+    function formatTime(ms) {
+      const totalSeconds = ms / 1000;
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      const fraction = Math.floor((ms % 1000) / 10);
+
+      const mm = minutes.toString().padStart(2, "0");
+      const ss = seconds.toString().padStart(2, "0");
+      const ff = fraction.toString().padStart(2, "0");
+      if (hours === 0) {
+        return mm + ":" + ss + "." + ff;
+      } else {
+        const hh = hours.toString().padStart(2, "0");
+        return hh + ":" + mm + ":" + ss + "." + ff;
+      }
+    }
+
+    function updateTimerDisplay() {
+      timerDisplay.textContent = formatTime(timerMs);
+    }
+
+    function startTimer() {
+      if (timerInterval !== null) return;
+      const start = performance.now() - timerMs;
+      timerInterval = setInterval(() => {
+        timerMs = performance.now() - start;
+        updateTimerDisplay();
+      }, 40);
+      timerStart.classList.add("active");
+      timerStop.classList.remove("active");
+    }
+
+    function stopTimer() {
+      if (timerInterval !== null) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      timerStart.classList.remove("active");
+      timerStop.classList.add("active");
+      updateTimerDisplay();
+    }
+
+    function resetTimer() {
+      stopTimer();
+      timerMs = 0;
+      timerStart.classList.remove("active");
+      timerStop.classList.remove("active");
+      updateTimerDisplay();
+    }
+
+    /* звёзды по периметру таймера */
+    function spawnStarsBurst() {
+      const rect = timerBlock.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      const perimeter = 2 * (w + h);
+      const step = 14;
+      const count = Math.floor(perimeter / step);
+
+      for (let i = 0; i < count; i++) {
+        const t = (i / count) * perimeter;
+
+        let x, y;
+        if (t < w) {
+          x = t;
+          y = 0;
+        } else if (t < w + h) {
+          x = w;
+          y = t - w;
+        } else if (t < 2 * w + h) {
+          x = w - (t - (w + h));
+          y = h;
+        } else {
+          x = 0;
+          y = h - (t - (2 * w + h));
+        }
+
+        const jitter = (Math.random() - 0.5) * 10;
+
+        const star = document.createElement("div");
+        star.className = "star";
+        star.style.left = x + "px";
+        star.style.top = y + "px";
+
+        const angle = Math.atan2(y - h / 2, x - w / 2);
+        const dist = 12 + Math.random() * 10;
+        const offsetX = Math.cos(angle) * dist + jitter;
+        const offsetY = Math.sin(angle) * dist + jitter;
+
+        star.style.setProperty("--tx", offsetX + "px");
+        star.style.setProperty("--ty", offsetY + "px");
+
+        timerBlock.appendChild(star);
+        setTimeout(() => star.remove(), 520);
+      }
+    }
+
+    /* фейерверки с левой и правой стороны экрана */
+    function spawnSideFireworks() {
+      const countPerSide = 20;
+      const height = window.innerHeight;
+
+      function createSide(side) {
+        for (let i = 0; i < countPerSide; i++) {
+          const fw = document.createElement("div");
+          fw.className = "side-firework";
+          fw.style.top = (20 + Math.random() * 60) + "vh";
+          fw.style.left = side === "left" ? "2vw" : "98vw";
+
+          const angle = (Math.random() * Math.PI) - Math.PI / 2; // вверх и немного в центр
+          const dist = 40 + Math.random() * 40;
+          const dx = Math.cos(angle) * dist * (side === "left" ? 1 : -1);
+          const dy = Math.sin(angle) * dist;
+
+          fw.style.setProperty("--dx", dx + "px");
+          fw.style.setProperty("--dy", dy + "px");
+
+          document.body.appendChild(fw);
+          setTimeout(() => fw.remove(), 750);
+        }
+      }
+
+      createSide("left");
+      createSide("right");
+    }
+
+    function checkAutoFinish() {
+      const states = currentCells.map(c => c.dataset.state || "none");
+      const left = states.filter(s => s === "none").length;
+      if (left !== 0) return;
+      const filled = states.filter(s => s !== "none");
+      const uniq = new Set(filled);
+      if (uniq.size !== 1) return;
+
+      gameRunning = false;
+      stopTimer();
+      spawnStarsBurst();
+      spawnSideFireworks();
+
+      startRoundBtn.style.display = "none";
+      resetGameBtn.style.display = "none";
+      playAgainBtn.style.display = "";
+    }
+
+    refreshBtn.addEventListener("click", () => {
+      generateBingo();
+    });
+
+    startRoundBtn.addEventListener("click", () => {
+      if (currentCells.length === 0) return;
+      resetTimer();
+      resetMarks();
+      gameRunning = true;
+      startTimer();
+      startRoundBtn.style.display = "none";
+      resetGameBtn.style.display = "";
+      playAgainBtn.style.display = "none";
+    });
+
+    resetGameBtn.addEventListener("click", () => {
+      resetTimer();
+      resetMarks();
+      gameRunning = false;
+      startRoundBtn.style.display = "";
+      resetGameBtn.style.display = "none";
+      playAgainBtn.style.display = "none";
+    });
+
+    playAgainBtn.addEventListener("click", () => {
+      generateBingo();
+    });
+
+    timerStart.addEventListener("click", () => {
+      if (!gameRunning) {
+        startRoundBtn.click();
+      } else {
+        startTimer();
+      }
+    });
+
+    timerStop.addEventListener("click", () => {
+      stopTimer();
+    });
+
+    timerReset.addEventListener("click", () => {
+      resetTimer();
+    });
+
+    worldPrev.addEventListener("click", () => {
+      worldModeIndex = (worldModeIndex - 1 + worldModes.length) % worldModes.length;
+      updateWorldLabel();
+    });
+    worldNext.addEventListener("click", () => {
+      worldModeIndex = (worldModeIndex + 1) % worldModes.length;
+      updateWorldLabel();
+    });
+
+    difficultyToggle.addEventListener("click", () => {
+      if (!Array.isArray(difficulties) || difficulties.length === 0) {
+        difficultyText.textContent = "Список усложнений не загружен.";
+        difficultyPanel.classList.add("visible");
+        return;
+      }
+      if (!hasDifficulty) {
+        const idx = Math.floor(Math.random() * difficulties.length);
+        difficultyText.textContent = difficulties[idx];
+        hasDifficulty = true;
+        difficultyToggle.classList.add("active");
+        difficultyPanel.classList.add("visible");
+      } else {
+        difficultyPanel.classList.toggle("visible");
+      }
+    });
+
+    difficultyInlineClose.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hasDifficulty = false;
+      difficultyToggle.classList.remove("active");
+      difficultyPanel.classList.remove("visible");
+      difficultyText.textContent = "Нажми «Усложнение», чтобы выбрать правило для текущего забега.";
+    });
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("light-theme");
+      themeToggle.textContent = document.body.classList.contains("light-theme")
+        ? "Светлая" : "Тёмная";
+    });
+
+    document.addEventListener("contextmenu", e => {
+      if (e.target.classList.contains("cell")) e.preventDefault();
+    });
+
+    // --- ШЕРИНГ ТЕКУЩЕЙ КАРТЫ ---
+
+    const shareLinkBtn = document.getElementById("shareLinkBtn");
+
+    function getCurrentCardState() {
+      const names = currentCells.map(c => c.dataset.name || "");
+      return names;
+    }
+
+    function encodeCardToUrl() {
+      const base = window.location.origin + window.location.pathname;
+      const mode = parseInt(modeSelect.value, 10);
+      const items = getCurrentCardState();
+      const payload = {
+        m: mode,
+        w: worldModes[worldModeIndex],
+        items: items
+      };
+      const encoded = encodeURIComponent(btoa(JSON.stringify(payload)));
+      return base + "?card=" + encoded;
+    }
+
+    function applyCardFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const cardParam = params.get("card");
+      if (!cardParam) return false;
+      try {
+        const json = atob(decodeURIComponent(cardParam));
+        const data = JSON.parse(json);
+        if (!data || !Array.isArray(data.items) || !data.m) return false;
+
+        modeSelect.value = String(data.m);
+        const worldIndex = worldModes.indexOf(data.w);
+        if (worldIndex !== -1) {
+          worldModeIndex = worldIndex;
+          updateWorldLabel();
+        }
+
+        const mode = data.m;
+        const side = Math.sqrt(mode);
+        gridEl.innerHTML = "";
+        gridEl.style.gridTemplateColumns = `repeat(${side}, minmax(0, 1fr))`;
+        currentCells = [];
+
+        for (let i = 0; i < mode; i++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          const name = data.items[i] || "";
+          cell.textContent = name;
+          cell.dataset.name = name;
+          cell.dataset.state = "none";
+          cell.addEventListener("click", () => setCellState(cell, "left"));
+          cell.addEventListener("contextmenu", e => {
+            e.preventDefault();
+            setCellState(cell, "right");
+          });
+          currentCells.push(cell);
+          gridEl.appendChild(cell);
+        }
+
+        gameRunning = false;
+        resetTimer();
+        startRoundBtn.style.display = "";
+        resetGameBtn.style.display = "none";
+        playAgainBtn.style.display = "none";
+
+        return true;
+      } catch (e) {
+        console.error("bad card param", e);
+        return false;
+      }
+    }
+
+if (shareLinkBtn) {
+  shareLinkBtn.addEventListener("click", () => {
+    const url = encodeCardToUrl();
+
+    // сначала пробуем clipboard (если доступен)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        shareLinkBtn.textContent = "Ссылка скопирована!";
+        setTimeout(() => {
+          shareLinkBtn.textContent = "Скопировать ссылку на эту карту";
+        }, 2000);
+      }).catch(() => {
+        // если не дали доступ — через prompt
+        window.prompt("Скопируй ссылку вручную:", url);
+      });
+    } else {
+      // старые браузеры — сразу prompt
+      window.prompt("Скопируй ссылку вручную:", url);
+    }
+  });
+}
+
+    updateWorldLabel();
+    if (!applyCardFromUrl()) {
+      generateBingo();
+    }
+    updateTimerDisplay();
+  </script>
+</body>
+</html>
